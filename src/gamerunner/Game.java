@@ -1,8 +1,12 @@
 package gamerunner;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Map;
 import java.util.Properties;
@@ -15,7 +19,7 @@ public class Game {
 	public Game(Map<String, Value> props) {
 		this.props = props;
 	}
-	public void loadPropertiesFile() {
+	private void loadPropertiesFile() {
 		Properties prop = new Properties();
 		for(String key : this.props.keySet()) {
 			prop.setProperty(key, this.props.get(key).getString());
@@ -28,15 +32,57 @@ public class Game {
 			e.printStackTrace();
 		}
 	}
-	public void runGame() throws IOException {
-		ProcessBuilder procB = new ProcessBuilder("pwd");
+	public void clearReplays() throws IOException {
+		//ProcessBuilder procB = new ProcessBuilder("rm", "*.log");
+		ProcessBuilder procB = new ProcessBuilder("./removeReplays.sh");
+		procB.directory(new File(Constants.REPLAY_FOLDER));
 		Process proc = procB.start();
-		while(proc.isAlive());
+		while(proc.isAlive()) {
+			BufferedReader programOutput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			while(programOutput.ready()) {
+				programOutput.readLine();
+				System.out.println(programOutput.readLine());
+			}
+		}
 		proc.destroy();
 	}
-	public double getScoreFromGame() {
+	private void runGame() throws IOException, InterruptedException {
+		ProcessBuilder procB = new ProcessBuilder("java", "-jar", "tank-engine.jar", "bot", "opp");
+		procB.directory(new File(Constants.RUN_ENV_LOC));
+		Process proc = procB.start();
+		while(proc.isAlive()) {
+			BufferedReader programOutput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			while(programOutput.ready()) {
+				programOutput.readLine();
+				//System.out.println(programOutput.readLine());
+			}
+		}
+		BufferedReader programOutput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+		while(programOutput.ready()) {
+			programOutput.readLine();
+			//System.out.println(programOutput.readLine());
+		}
+		proc.destroy();
+	}
+	private GameData getScoresFromReplayFile() throws FileNotFoundException {
+		GameData g = new GameData(Constants.LATEST_REPLAY_FILE, this.props);
+		return g;
+	}
+	public GameData runGameReturnResults() throws IOException, InterruptedException {
 		this.loadPropertiesFile();
-		
-		return -1.0;
+		this.runGame();
+		GameData gd = this.getScoresFromReplayFile();
+		this.clearReplays();
+		return gd;
+	}
+	public GameData[] runGamesReturnResults(int numGames) throws IOException, InterruptedException {
+		this.loadPropertiesFile();
+		GameData[] results = new GameData[numGames];
+		for(int i = 0; i < numGames; i++) {
+			this.runGame();
+			results[i] = this.getScoresFromReplayFile();
+		}
+		this.clearReplays();
+		return results;
 	}
 }
