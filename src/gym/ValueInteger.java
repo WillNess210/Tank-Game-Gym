@@ -23,9 +23,22 @@ public class ValueInteger implements Value<Integer>{
 	public Value<Integer> mate(Value<Integer> partner, Value<Integer>  valMin, Value<Integer>  valMax) {
 		int ourAvg = (int) ((this.getValue() + partner.getValue())/2);
 		if(Constants.shouldMutate()) {
-			int mutatedVal = ourAvg + (int) ((Constants.r.nextBoolean() ? (1.0) : (-1.0)) * Constants.r.nextDouble() * Constants.mutateRange * (valMax.getValue() - valMin.getValue()));
-			ourAvg = Math.min(valMax.getValue(), Math.max(valMin.getValue(), mutatedVal));
+			Value<Integer> nv = new ValueInteger(ourAvg);
+			return nv.mutate(valMin, valMax);
 		}
 		return new ValueInteger(ourAvg);
+	}
+	@Override
+	public Value<Integer> mutate(Value<Integer> valMin, Value<Integer> valMax) {
+		int mutatedVal = this.value + (int) ((Constants.r.nextBoolean() ? (1.0) : (-1.0)) * Constants.r.nextDouble() * Constants.mutateRange * (valMax.getValue() - valMin.getValue()));
+		mutatedVal = Math.min(valMax.getValue(), Math.max(valMin.getValue(), mutatedVal));
+		return new ValueInteger(mutatedVal);
+	}
+	@Override
+	public Value<Integer> mutateWithOdds(Value<Integer> valMin, Value<Integer> valMax) {
+		if(Constants.shouldMutate()) {
+			return this.mutate(valMin, valMax);
+		}
+		return new ValueInteger(this.value);
 	}
 }

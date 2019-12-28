@@ -21,11 +21,24 @@ public class ValueDouble implements Value<Double>{
 	}
 	@Override
 	public Value<Double> mate(Value<Double> partner, Value<Double> valMin, Value<Double> valMax) {
-		double ourAvg = (this.value + partner.getValue())/2.0;
+		double nextVal = (this.value + partner.getValue())/2.0;
 		if(Constants.shouldMutate()) {
-			double mutatedVal = ourAvg + ((Constants.r.nextBoolean() ? (1.0) : (-1.0)) * Constants.r.nextDouble() * Constants.mutateRange * (valMax.getValue() - valMin.getValue()));
-			ourAvg = Math.min(valMax.getValue(), Math.max(valMin.getValue(), mutatedVal));
+			Value<Double> nv = new ValueDouble(nextVal);
+			return nv.mutate(valMin, valMax);
 		}
-		return new ValueDouble(ourAvg);
+		return new ValueDouble(nextVal);
+	}
+	@Override
+	public Value<Double> mutate(Value<Double> valMin, Value<Double> valMax) {
+		double mutatedVal = this.value + ((Constants.r.nextBoolean() ? (1.0) : (-1.0)) * Constants.r.nextDouble() * Constants.mutateRange * (valMax.getValue() - valMin.getValue()));
+		mutatedVal = Math.min(valMax.getValue(), Math.max(valMin.getValue(), mutatedVal));
+		return new ValueDouble(mutatedVal);
+	}
+	@Override
+	public Value<Double> mutateWithOdds(Value<Double> valMin, Value<Double> valMax) {
+		if(Constants.shouldMutate()) {
+			return this.mutate(valMin, valMax);
+		}
+		return new ValueDouble(this.value);
 	}
 }

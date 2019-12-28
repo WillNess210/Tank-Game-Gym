@@ -10,14 +10,21 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 
 import gym.Constants;
 import gym.Value;
 
 public class Game {
 	private Map<String, Value> props;
+	private long seed;
 	public Game(Map<String, Value> props) {
 		this.props = props;
+		this.seed = (new Random()).nextLong();
+	}
+	public Game(Map<String, Value> props, long seed) {
+		this.props = props;
+		this.seed = seed;
 	}
 	private void loadPropertiesFile() {
 		Properties prop = new Properties();
@@ -47,7 +54,10 @@ public class Game {
 		proc.destroy();
 	}
 	private void runGame() throws IOException, InterruptedException {
-		ProcessBuilder procB = new ProcessBuilder("java", "-jar", "tank-engine.jar", "bot", "opp");
+		runGame(this.seed);
+	}
+	private void runGame(long mapSeed) throws IOException, InterruptedException {
+		ProcessBuilder procB = new ProcessBuilder("java", "-jar", "tank-engine.jar", "bot", "opp", "" + mapSeed);
 		procB.directory(new File(Constants.RUN_ENV_LOC));
 		Process proc = procB.start();
 		while(proc.isAlive()) {
@@ -80,6 +90,20 @@ public class Game {
 		GameData[] results = new GameData[numGames];
 		for(int i = 0; i < numGames; i++) {
 			this.runGame();
+			results[i] = this.getScoresFromReplayFile();
+		}
+		this.clearReplays();
+		return results;
+	}
+	public GameData[] runGamesReturnResults(int numGames, long[] mapSeeds) throws IOException, InterruptedException {
+		if(numGames != mapSeeds.length) {
+			System.err.println("ERROR: numGames != mapSeeds.length");
+			return null;
+		}
+		this.loadPropertiesFile();
+		GameData[] results = new GameData[numGames];
+		for(int i = 0; i < numGames; i++) {
+			this.runGame(mapSeeds[i]);
 			results[i] = this.getScoresFromReplayFile();
 		}
 		this.clearReplays();

@@ -7,11 +7,11 @@ public class Main_GeneticAlgorithmRunner {
 	public static void main(String[] args) throws IOException, InterruptedException {
 		// SETTING UP PARAMETERS
 		ParameterSet ps = new ParameterSet();
-		ps.addParam("rovers_per_site", 4, 8);
-		ps.addParam("stop_spawning_turn", 75, 201);
+		ps.addParam("rovers_per_site", 0, 50);
+		ps.addParam("stop_spawning_turn", 0, 201);
 		
 		GeneticAlgorithmRunner gar = new GeneticAlgorithmRunner(ps);
 		// run
-		gar.runGamesReturnBest(30, 20, 10);
+		gar.runGamesReturnBest(100, 50, 30);
 	}
 }

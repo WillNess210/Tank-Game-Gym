@@ -41,13 +41,22 @@ public class ParameterSet {
 	}
 	public Map<String, Value> mate(Map<String, Value> p1, Map<String, Value> p2){
 		Map<String, Value> child = new HashMap<String, Value>();
-		for(Parameter p : this.params) {
+		int crossOverIndex = Constants.r.nextInt(this.params.size() >= 1 ? this.params.size() - 1 : this.params.size());
+		for(int i = 0; i < this.params.size(); i++) {
+			Parameter p = this.params.get(i);
 			String paramName = p.getParamName();
+			Value nextVal = null;
 			Value valMin = p.getValMin();
 			Value valMax = p.getValMax();
-			Value p1Val = p1.get(paramName);
-			Value p2Val = p2.get(paramName);
-			Value nextVal = p1Val.mate(p2Val, valMin, valMax);
+			if(Constants.shouldAvg()) {
+				Value p1Val = p1.get(paramName);
+				Value p2Val = p2.get(paramName);
+				nextVal = p1Val.mate(p2Val, valMin, valMax);
+			}else if(i <= crossOverIndex) {
+				nextVal = p1.get(paramName).mutateWithOdds(valMin, valMax);
+			}else{
+				nextVal = p2.get(paramName).mutateWithOdds(valMin, valMax);
+			}
 			child.put(paramName, nextVal);
 		}
 		return child;

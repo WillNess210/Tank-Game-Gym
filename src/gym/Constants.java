@@ -27,6 +27,11 @@ public class Constants {
 	public static final boolean shouldMutate() {
 		return r.nextDouble() <= mutateOdds;
 	}
+	public static final double avgOdds = 0.33;
+	public static final boolean shouldAvg() {
+		return r.nextDouble() <= avgOdds;
+	}
+	
 	
 	public static final int getGAIndex(int size) {
 		return (int) Math.floor((r.nextDouble() * r.nextDouble() * r.nextDouble()) * size);

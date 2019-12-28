@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 import java.util.TreeMap;
 
 import gamerunner.Game;
@@ -24,12 +25,18 @@ public class GeneticAlgorithmRunner {
 		for(int i = 0; i < popSize; i++) {
 			pop.put(this.ps.generateRandomProperties(), -1.0);
 		}
+		// generate matchesPerGEnerationPerIndiv worth of random map seeds for every player to use
+		long[] mapSeeds = new long[matchesPerGenerationPerIndiv];
+		Random r = new Random();
+		for(int j = 0; j < mapSeeds.length; j++) {
+			mapSeeds[j] = r.nextLong();
+		}
 		for(int i = 1; i <= numGenerations; i++) {
 			// play games & load avg into map
 			for(Map<String, Value> indiv : pop.keySet()) {
 				this.ps.writeToFile(indiv);
 				Game newGame = new Game(indiv);
-				GameData[] results = newGame.runGamesReturnResults(matchesPerGenerationPerIndiv);
+				GameData[] results = newGame.runGamesReturnResults(matchesPerGenerationPerIndiv, mapSeeds);
 				double score = 0.0;
 				for(GameData gd : results) {
 					score += gd.getScore(0);
@@ -52,10 +59,10 @@ public class GeneticAlgorithmRunner {
 				bestFound = popSorted.get(0);
 				newBestFound = true;
 			}
-			// print to console top 10
+			// print to console top 100
 			DecimalFormat dfmt = new DecimalFormat(",000.0");
-			System.out.println("===== CURRENT BEST AFTER " + i + " GENERATIONS w/ score " + dfmt.format(pop.get(popSorted.get(0))) + Constants.propertiesMapToStringTuple(bestFound) + " =====");
-			for(int j = 0; j < 10 && j < popSize; j++) {
+			System.out.println("===== CURRENT BEST AFTER " + i + " GENERATIONS w/ score " + dfmt.format(bestFoundScore) + Constants.propertiesMapToStringTuple(bestFound) + " =====");
+			for(int j = 0; j < 100 && j < popSize; j++) {
 				System.out.println((j + 1) + ". " + Constants.propertiesMapToStringTuple(popSorted.get(j)) + " - " + pop.get(popSorted.get(j)));
 			}
 			if(newBestFound) {
@@ -73,6 +80,7 @@ public class GeneticAlgorithmRunner {
 				Map<String, Value> child = this.ps.mate(p1, p2);
 				nextPop.put(child, -1.0);
 			}
+			pop = nextPop;
 		}
 		return bestFound;
 	}
