@@ -9,6 +9,7 @@ public class Main_GeneticAlgorithmRunner {
 		ParameterSet ps = new ParameterSet();
 		ps.addParam("rovers_per_site", 0, 50);
 		ps.addParam("stop_spawning_turn", 0, 201);
+		ps.addParam("base_rovers", 0, 50);
 		
 		GeneticAlgorithmRunner gar = new GeneticAlgorithmRunner(ps);
 		// run

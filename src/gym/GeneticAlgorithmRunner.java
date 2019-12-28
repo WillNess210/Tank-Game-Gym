@@ -62,12 +62,19 @@ public class GeneticAlgorithmRunner {
 			// print to console top 100
 			DecimalFormat dfmt = new DecimalFormat(",000.0");
 			System.out.println("===== CURRENT BEST AFTER " + i + " GENERATIONS w/ score " + dfmt.format(bestFoundScore) + Constants.propertiesMapToStringTuple(bestFound) + " =====");
+			double total = 0.0;
 			for(int j = 0; j < 100 && j < popSize; j++) {
 				System.out.println((j + 1) + ". " + Constants.propertiesMapToStringTuple(popSorted.get(j)) + " - " + pop.get(popSorted.get(j)));
+				total += pop.get(popSorted.get(j));
+			}
+			for(int j = 100; j < popSize; j++) {
+				total += pop.get(popSorted.get(j));
 			}
 			if(newBestFound) {
 				System.out.println("A new best found happened this generation.");
 			}
+			// print generation average
+			System.out.println("Average score: " + dfmt.format(total/popSize));
 			// if at end, break for loop
 			if(i == numGenerations) break;
 			
